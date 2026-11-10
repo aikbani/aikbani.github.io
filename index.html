@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SqueekWatch — Squeekchain account &amp; merge desk</title>
+<meta name="description" content="Read-only Squeekchain desk: check any wallet's Squeeks, power, claimable SQK and plan merges. Sepolia testnet only. No wallet connection, no keys.">
+<!-- Genesis verification: YOUR_PAGE_TAG — paste the tag Genesis issues you here -->
+<style>
+  :root { --bg:#14110a; --card:#1f1a12; --line:#3a3122; --ink:#f2e9d5; --dim:#b3a586; --gold:#f5b942; --green:#7fce6e; --red:#e06c5a; --blue:#7fb8e0; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { padding:34px 20px 10px; max-width:920px; margin:0 auto; }
+  h1 { margin:0; font-size:34px; letter-spacing:.5px; }
+  h1 span { color:var(--gold); }
+  .sub { color:var(--dim); margin:6px 0 0; }
+  .pills { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0 0; }
+  .pill { border:1px solid var(--line); border-radius:999px; padding:4px 12px; font-size:13px; color:var(--dim); }
+  .pill b { color:var(--green); font-weight:600; }
+  main { max-width:920px; margin:0 auto; padding:10px 20px 40px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-top:18px; }
+  h2 { margin:0 0 4px; font-size:20px; }
+  h2 small { color:var(--dim); font-weight:400; font-size:14px; }
+  p.hint { color:var(--dim); margin:4px 0 12px; font-size:14px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:12px; }
+  .stat { border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .stat .k { font-size:12px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; }
+  .stat .v { font-size:20px; font-weight:700; margin-top:2px; word-break:break-all; }
+  .stat .v small { font-size:13px; color:var(--dim); font-weight:400; }
+  input[type=text], input[type=number] { width:100%; background:#14110a; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:10px 12px; font-size:15px; }
+  button { background:var(--gold); color:#241a05; border:0; border-radius:8px; padding:10px 18px; font-size:15px; font-weight:700; cursor:pointer; }
+  button:hover { filter:brightness(1.08); }
+  .row { display:flex; gap:10px; margin-top:10px; }
+  .row input { flex:1; }
+  table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:600; }
+  .bars { display:flex; align-items:flex-end; gap:6px; height:90px; margin-top:12px; }
+  .bar { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .bar i { display:block; width:100%; background:var(--gold); border-radius:4px 4px 0 0; min-height:2px; }
+  .bar span { font-size:11px; color:var(--dim); margin-top:4px; }
+  .ok { color:var(--green); } .warn { color:var(--red); } .mut { color:var(--dim); }
+  .callout { border-left:3px solid var(--gold); padding:8px 12px; background:#14110a; border-radius:0 8px 8px 0; margin-top:12px; font-size:14px; }
+  footer { max-width:920px; margin:0 auto; padding:0 20px 40px; color:var(--dim); font-size:13px; }
+  a { color:var(--blue); }
+  .err { color:var(--red); margin-top:10px; }
+  @media (max-width:560px){ h1{font-size:26px;} .row{flex-direction:column;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>🐹 Squeek<span>Watch</span></h1>
+  <p class="sub">A community project for the Squeekchain Buildooooor badge. Read-only account &amp; merge desk for Squeekchain on Sepolia testnet.</p>
+  <div class="pills">
+    <span class="pill"><b>✓</b> Sepolia testnet only</span>
+    <span class="pill"><b>✓</b> No wallet connection</span>
+    <span class="pill"><b>✓</b> No keys, no signing</span>
+    <span class="pill">Public API only</span>
+  </div>
+</header>
+
+<main>
+  <section id="wheel">
+    <h2>The wheel, live <small>· public API</small></h2>
+    <p class="hint">Live state of the Squeekchain Sepolia deployment, refreshed when this page loads.</p>
+    <div class="grid" id="wheelStats"><div class="stat"><div class="k">Status</div><div class="v"><small>loading…</small></div></div></div>
+  </section>
+
+  <section id="account">
+    <h2>Account lookup <small>· any wallet</small></h2>
+    <p class="hint">Paste a wallet address to see its Squeeks, power, claimable SQK and recent earnings. Nothing is sent anywhere except the public Squeekchain API.</p>
+    <div class="row">
+      <input type="text" id="wallet" value="0x425cB20d90ff89f77B146C3D5cE387Be5F8e6E7b" spellcheck="false" autocomplete="off">
+      <button id="checkBtn">Check</button>
+    </div>
+    <div id="accountOut"><p class="mut" style="margin-top:12px">Press Check — or wait, it loads the wallet above automatically.</p></div>
+  </section>
+
+  <section id="merge">
+    <h2>Merge planner <small>· level 1 → 10</small></h2>
+    <p class="hint">Merging two Squeeks of the same level makes one a level higher with 2.2× the base power — 10% more than the pair combined. Level 1 has no cooldown; higher levels wait out a cooldown measured in completed Squeek blocks. Max level is 10.</p>
+    <div class="row">
+      <label style="flex:1">I have <input type="number" id="haveCount" value="1" min="1" max="1024" style="width:90px"> level-1 Squeek(s)</label>
+      <button id="planBtn">Plan</button>
+    </div>
+    <div id="planOut"></div>
+    <table id="levelTable">
+      <thead><tr><th>Level</th><th>Base power</th><th>Level-1 Squeeks needed</th><th>vs. the pair</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="how">
+    <h2>How earning works <small>· the short version</small></h2>
+    <p>Only <b>deposited</b> Squeeks count toward power. A Squeek sitting in your wallet earns nothing — deposit it in Staking from the official Sepolia app and its power starts earning immediately. Your power is your deposited Squeeks' base power plus your staked SQK's power, boosted by your Squeek power. Settled blocks only turn into issued SQK when someone calls <code>checkpoint()</code> on the SqueekMining contract — anyone can call it, it costs only Sepolia gas.</p>
+    <div class="callout">⚠️ Testnet SQK and test Squeeks have <b>no monetary value</b>. The real $SQK token has not launched — anything trading as SQK today is fake. Never share a seed phrase or private key with any site, including this one: SqueekWatch never asks for them.</div>
+    <p style="margin-top:12px">Official links:
+      <a href="https://squeekchain.com/" target="_blank" rel="noopener">squeekchain.com</a> ·
+      <a href="https://squeekchain.com/genesis" target="_blank" rel="noopener">Genesis</a> ·
+      <a href="https://docs.squeekchain.com/" target="_blank" rel="noopener">Docs</a> ·
+      <a href="https://sepolia.squeekchain.com/" target="_blank" rel="noopener">Sepolia app</a> ·
+      <a href="https://api.squeekchain.com/v1/status" target="_blank" rel="noopener">Public API status</a>
+    </p>
+  </section>
+</main>
+
+<footer>
+  <p>SqueekWatch — <a href="https://aikbani.github.io/">https://aikbani.github.io/</a> — Squeekchain account &amp; merge desk by @anehnihorang (repo: <a href="https://github.com/aikbani/aikbani.github.io">github.com/aikbani/aikbani.github.io</a>).</p>
+  <p>SqueekWatch is a community project for the Squeekchain Buildooooor badge. It is not affiliated with the Squeekchain team, and it does not promise a badge, a whitelist spot, or any token.</p>
+</footer>
+
+<script>
+const API = "https://api.squeekchain.com";
+const fmt = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
+const fromUnits = s => Number(BigInt(s)) / 1e18;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function getJSON(path) {
+  const r = await fetch(API + path, { headers: { "Accept": "application/json" } });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.json();
+}
+
+async function loadWheel() {
+  const el = document.getElementById("wheelStats");
+  try {
+    const [st, acc] = await Promise.all([
+      getJSON("/v1/status").catch(() => null),
+      getJSON("/v1/economy/state").catch(() => null)
+    ]);
+    const eco = (acc && acc.economy) || (st && st.economy) || {};
+    const chain = (acc && acc.chain) || {};
+    const rows = [
+      ["Current round", eco.currentRound ?? "—"],
+      ["Core block height", eco.coreBlockHeight ?? "—"],
+      ["Merges open", eco.mergesOpen === true ? "Yes" : eco.mergesOpen === false ? "No" : "—"],
+      ["Staking paused", eco.stakingPaused === true ? "Yes" : eco.stakingPaused === false ? "No" : "—"],
+      ["Max level", eco.maximumLevel ?? "10"],
+      ["Indexed block", chain.indexedThroughBlock ?? "—"]
+    ];
+    el.innerHTML = rows.map(([k, v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`).join("");
+  } catch (e) {
+    el.innerHTML = `<div class="stat"><div class="k">Status</div><div class="v"><small>API unreachable — try again in a minute.</small></div></div>`;
+  }
+}
+
+async function loadAccount(addr) {
+  const out = document.getElementById("accountOut");
+  if (!/^0x[0-9a-fA-F]{40}$/.test(addr)) { out.innerHTML = `<p class="err">That doesn't look like a wallet address (0x + 40 hex characters).</p>`; return; }
+  out.innerHTML = `<p class="mut" style="margin-top:12px">Loading…</p>`;
+  try {
+    const d = await getJSON("/v1/accounts/" + addr);
+    const toks = d.tokens || [];
+    const claimable = fromUnits(d.rewards.claimableBaseUnits);
+    const lifetime = fromUnits(d.rewards.lifetimePaidBaseUnits);
+    const nftPower = fromUnits(d.power.nftPower);
+    const sqkPower = fromUnits(d.power.sqkPower);
+    const counts = d.tokenCounts || {};
+    const earn = (d.earnings || []).slice(-7);
+    const maxEarn = Math.max(1, ...earn.map(e => fromUnits(e.earnedBaseUnits)));
+    const rows = toks.map(t => `<tr><td>#${esc(t.tokenId)}</td><td>${esc(t.level)}</td><td>${esc(t.custody)}</td><td>${fmt(t.basePower)}</td><td>${esc(t.mergeState || "—")}</td></tr>`).join("") || `<tr><td colspan="5" class="mut">No Squeeks on this wallet.</td></tr>`;
+    const staked = toks.filter(t => t.custody === "staking").length;
+    const inWallet = toks.filter(t => t.custody === "wallet").length;
+    out.innerHTML = `
+      <div class="grid">
+        <div class="stat"><div class="k">Squeeks</div><div class="v">${toks.length} <small>(${staked} staked · ${inWallet} in wallet)</small></div></div>
+        <div class="stat"><div class="k">Claimable SQK</div><div class="v">${fmt(claimable)}</div></div>
+        <div class="stat"><div class="k">Lifetime paid SQK</div><div class="v">${fmt(lifetime)}</div></div>
+        <div class="stat"><div class="k">NFT power</div><div class="v">${fmt(nftPower)}</div></div>
+        <div class="stat"><div class="k">SQK power</div><div class="v">${fmt(sqkPower)}</div></div>
+        <div class="stat"><div class="k">Current round</div><div class="v">${esc((d.economy || {}).currentRound ?? "—")}</div></div>
+      </div>
+      ${inWallet > 0 ? `<div class="callout">⚠️ ${inWallet} Squeek(s) sitting in this wallet earn nothing. Deposit them in Staking from the official Sepolia app to activate their power.</div>` : ""}
+      <table><thead><tr><th>Token</th><th>Level</th><th>Custody</th><th>Base power</th><th>Merge</th></tr></thead><tbody>${rows}</tbody></table>
+      <h3 style="margin:18px 0 0; font-size:15px;">Earnings, last 7 days <span class="mut">(SQK)</span></h3>
+      <div class="bars">${earn.map(e => { const v = fromUnits(e.earnedBaseUnits); return `<div class="bar"><i style="height:${Math.max(2, v / maxEarn * 62)}px" title="${fmt(v)} SQK"></i><span>${esc(e.date.slice(5))}</span></div>`; }).join("")}</div>`;
+  } catch (e) {
+    out.innerHTML = `<p class="err">Could not load this account from the public API (${esc(e.message)}). Check the address and try again.</p>`;
+  }
+}
+
+function renderLevels() {
+  const tb = document.querySelector("#levelTable tbody");
+  let html = "";
+  for (let lv = 1; lv <= 10; lv++) {
+    const power = 1000 * Math.pow(2.2, lv - 1);
+    const need = Math.pow(2, lv - 1);
+    html += `<tr><td>${lv}</td><td>${fmt(power)}</td><td>${need.toLocaleString("en-US")}</td><td>${lv === 1 ? "—" : "+10% per merge"}</td></tr>`;
+  }
+  tb.innerHTML = html;
+}
+
+function plan() {
+  const n = Math.max(1, Math.min(1024, parseInt(document.getElementById("haveCount").value || "1", 10)));
+  let level = 1, power = 1000, used = 1;
+  while (used * 2 <= n && level < 10) { used *= 2; level++; power = 1000 * Math.pow(2.2, level - 1); }
+  const leftover = n - used;
+  document.getElementById("planOut").innerHTML =
+    `<div class="callout">With <b>${n}</b> level-1 Squeek(s) you can merge up to <b>level ${level}</b> — one Squeek with <b>${fmt(power)}</b> base power${leftover ? `, plus ${leftover} level-1 leftover(s)` : ""}. Merging all the way from level 1 to ${level} takes ${level - 1} merge(s); level 1 has no cooldown, higher levels wait out a cooldown in completed blocks.</div>`;
+}
+
+document.getElementById("checkBtn").addEventListener("click", () => loadAccount(document.getElementById("wallet").value.trim()));
+document.getElementById("wallet").addEventListener("keydown", e => { if (e.key === "Enter") loadAccount(e.target.value.trim()); });
+document.getElementById("planBtn").addEventListener("click", plan);
+renderLevels();
+plan();
+loadWheel();
+loadAccount(document.getElementById("wallet").value.trim());
+</script>
+</body>
+</html>
