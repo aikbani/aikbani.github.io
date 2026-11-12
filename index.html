@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SqueekWatch — Squeekchain account &amp; merge desk</title>
-<meta name="description" content="Read-only Squeekchain desk: check any wallet's Squeeks, power, claimable SQK and plan merges. Sepolia testnet only. No wallet connection, no keys.">
+<meta name="description" content="Read-only Squeekchain desk: check any wallet's Squeeks, power, claimable SQK, staked SQK and plan merges. Live Genesis launch status. Sepolia testnet only. No wallet connection, no keys.">
 <!-- Genesis verification: YOUR_PAGE_TAG — paste the tag Genesis issues you here -->
 <style>
   :root { --bg:#14110a; --card:#1f1a12; --line:#3a3122; --ink:#f2e9d5; --dim:#b3a586; --gold:#f5b942; --green:#7fce6e; --red:#e06c5a; --blue:#7fb8e0; }
@@ -30,6 +30,7 @@
   input[type=text], input[type=number] { width:100%; background:#14110a; border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:10px 12px; font-size:15px; }
   button { background:var(--gold); color:#241a05; border:0; border-radius:8px; padding:10px 18px; font-size:15px; font-weight:700; cursor:pointer; }
   button:hover { filter:brightness(1.08); }
+  button.ghost { background:transparent; color:var(--gold); border:1px solid var(--gold); }
   .row { display:flex; gap:10px; margin-top:10px; }
   .row input { flex:1; }
   table { width:100%; border-collapse:collapse; margin-top:12px; font-size:14px; }
@@ -41,39 +42,58 @@
   .bar span { font-size:11px; color:var(--dim); margin-top:4px; }
   .ok { color:var(--green); } .warn { color:var(--red); } .mut { color:var(--dim); }
   .callout { border-left:3px solid var(--gold); padding:8px 12px; background:#14110a; border-radius:0 8px 8px 0; margin-top:12px; font-size:14px; }
+  .badge { display:inline-block; border:1px solid var(--line); border-radius:999px; padding:3px 10px; font-size:13px; margin:0 6px 6px 0; }
+  .badge b { color:var(--green); font-weight:600; }
   footer { max-width:920px; margin:0 auto; padding:0 20px 40px; color:var(--dim); font-size:13px; }
   a { color:var(--blue); }
   .err { color:var(--red); margin-top:10px; }
+  .updated { font-size:13px; color:var(--dim); margin-top:10px; }
   @media (max-width:560px){ h1{font-size:26px;} .row{flex-direction:column;} }
 </style>
 </head>
 <body>
 <header>
   <h1>🐹 Squeek<span>Watch</span></h1>
-  <p class="sub">A community project for the Squeekchain Buildooooor badge. Read-only account &amp; merge desk for Squeekchain on Sepolia testnet.</p>
+  <p class="sub">A community project for the Squeekchain Buildooooor badge. Read-only account &amp; merge desk for Squeekchain on Sepolia testnet. Data refreshes itself every 60 seconds.</p>
   <div class="pills">
     <span class="pill"><b>✓</b> Sepolia testnet only</span>
     <span class="pill"><b>✓</b> No wallet connection</span>
     <span class="pill"><b>✓</b> No keys, no signing</span>
     <span class="pill">Public API only</span>
+    <span class="pill">v2 · auto-refresh</span>
   </div>
 </header>
 
 <main>
   <section id="wheel">
     <h2>The wheel, live <small>· public API</small></h2>
-    <p class="hint">Live state of the Squeekchain Sepolia deployment, refreshed when this page loads.</p>
+    <p class="hint">Live state of the Squeekchain Sepolia deployment.</p>
     <div class="grid" id="wheelStats"><div class="stat"><div class="k">Status</div><div class="v"><small>loading…</small></div></div></div>
+    <p class="updated" id="updatedLine">Loading…</p>
+    <div class="row"><button class="ghost" id="refreshBtn">↻ Refresh now</button></div>
   </section>
 
   <section id="account">
     <h2>Account lookup <small>· any wallet</small></h2>
-    <p class="hint">Paste a wallet address to see its Squeeks, power, claimable SQK and recent earnings. Nothing is sent anywhere except the public Squeekchain API.</p>
+    <p class="hint">Paste a wallet address to see its Squeeks, power, staked SQK, claimable SQK and recent earnings. Nothing is sent anywhere except the public Squeekchain API.</p>
     <div class="row">
       <input type="text" id="wallet" value="0x425cB20d90ff89f77B146C3D5cE387Be5F8e6E7b" spellcheck="false" autocomplete="off">
       <button id="checkBtn">Check</button>
     </div>
     <div id="accountOut"><p class="mut" style="margin-top:12px">Press Check — or wait, it loads the wallet above automatically.</p></div>
+  </section>
+
+  <section id="genesis">
+    <h2>Genesis <small>· whitelist &amp; mainnet launch</small></h2>
+    <p class="hint">Farm Aura for the mainnet whitelist mint (9,999 Squeeks). Rank decides the whitelist. Aura and rank live behind your own Genesis login, so this page shows the public launch status plus the badges earned so far.</p>
+    <div id="launchOut"><p class="mut">Loading launch status…</p></div>
+    <p style="margin-top:14px"><b>Badges earned:</b></p>
+    <div>
+      <span class="badge"><b>✓</b> Signed Up</span>
+      <span class="badge"><b>✓</b> On Discord</span>
+      <span class="badge"><b>✓</b> The Tester</span>
+    </div>
+    <p class="hint">X linked: @anehnihorang · Wallet verified · One person, one account. Check your own Aura, rank and tier at <a href="https://squeekchain.com/genesis/me" target="_blank" rel="noopener">Genesis /me</a> (login required).</p>
   </section>
 
   <section id="merge">
@@ -105,7 +125,7 @@
 </main>
 
 <footer>
-  <p>SqueekWatch — <a href="https://aikbani.github.io/">https://aikbani.github.io/</a> — Squeekchain account &amp; merge desk by @anehnihorang (repo: <a href="https://github.com/aikbani/aikbani.github.io">github.com/aikbani/aikbani.github.io</a>).</p>
+  <p>SqueekWatch v2 — <a href="https://aikbani.github.io/">https://aikbani.github.io/</a> — Squeekchain account &amp; merge desk by @anehnihorang (repo: <a href="https://github.com/aikbani/aikbani.github.io">github.com/aikbani/aikbani.github.io</a>).</p>
   <p>SqueekWatch is a community project for the Squeekchain Buildooooor badge. It is not affiliated with the Squeekchain team, and it does not promise a badge, a whitelist spot, or any token.</p>
 </footer>
 
@@ -114,6 +134,7 @@ const API = "https://api.squeekchain.com";
 const fmt = n => Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
 const fromUnits = s => Number(BigInt(s)) / 1e18;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const wibTime = d => new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jakarta", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }).format(d) + " WIB";
 
 async function getJSON(path) {
   const r = await fetch(API + path, { headers: { "Accept": "application/json" } });
@@ -121,26 +142,43 @@ async function getJSON(path) {
   return r.json();
 }
 
+function stampUpdated() {
+  document.getElementById("updatedLine").textContent = "Last updated " + wibTime(new Date()) + " · auto-refreshes every 60 seconds.";
+}
+
 async function loadWheel() {
   const el = document.getElementById("wheelStats");
   try {
-    const [st, acc] = await Promise.all([
-      getJSON("/v1/status").catch(() => null),
-      getJSON("/v1/economy/state").catch(() => null)
+    const [ecoRes, acct] = await Promise.all([
+      getJSON("/v1/economy/state").catch(() => null),
+      getJSON("/v1/accounts/" + document.getElementById("wallet").value.trim()).catch(() => null)
     ]);
-    const eco = (acc && acc.economy) || (st && st.economy) || {};
-    const chain = (acc && acc.chain) || {};
+    const eco = (ecoRes && ecoRes.economy) || (acct && acct.economy) || {};
     const rows = [
       ["Current round", eco.currentRound ?? "—"],
       ["Core block height", eco.coreBlockHeight ?? "—"],
       ["Merges open", eco.mergesOpen === true ? "Yes" : eco.mergesOpen === false ? "No" : "—"],
       ["Staking paused", eco.stakingPaused === true ? "Yes" : eco.stakingPaused === false ? "No" : "—"],
       ["Max level", eco.maximumLevel ?? "10"],
-      ["Indexed block", chain.indexedThroughBlock ?? "—"]
+      ["Indexed block", (ecoRes && ecoRes.chain && ecoRes.chain.indexedThroughBlock) || (acct && acct.chain && acct.chain.indexedThroughBlock) || "—"]
     ];
     el.innerHTML = rows.map(([k, v]) => `<div class="stat"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`).join("");
   } catch (e) {
     el.innerHTML = `<div class="stat"><div class="k">Status</div><div class="v"><small>API unreachable — try again in a minute.</small></div></div>`;
+  }
+}
+
+async function loadLaunch() {
+  const el = document.getElementById("launchOut");
+  try {
+    const d = await getJSON("/v1/genesis-launch");
+    if (d.status === "available" || d.status === "open") {
+      el.innerHTML = `<div class="callout"><b>Mainnet launch: OPEN</b> — check the official Genesis page for mint details.</div>`;
+    } else {
+      el.innerHTML = `<p><b>Mainnet launch:</b> <span class="warn">not open yet</span> <span class="mut">(${esc(d.reason || d.status || "unconfigured")})</span></p>`;
+    }
+  } catch (e) {
+    el.innerHTML = `<p class="mut">Launch status unavailable right now — check <a href="https://squeekchain.com/genesis" target="_blank" rel="noopener">squeekchain.com/genesis</a>.</p>`;
   }
 }
 
@@ -153,27 +191,29 @@ async function loadAccount(addr) {
     const toks = d.tokens || [];
     const claimable = fromUnits(d.rewards.claimableBaseUnits);
     const lifetime = fromUnits(d.rewards.lifetimePaidBaseUnits);
+    const staked = fromUnits((d.stake || {}).principalBaseUnits || "0");
     const nftPower = fromUnits(d.power.nftPower);
     const sqkPower = fromUnits(d.power.sqkPower);
-    const counts = d.tokenCounts || {};
     const earn = (d.earnings || []).slice(-7);
     const maxEarn = Math.max(1, ...earn.map(e => fromUnits(e.earnedBaseUnits)));
     const rows = toks.map(t => `<tr><td>#${esc(t.tokenId)}</td><td>${esc(t.level)}</td><td>${esc(t.custody)}</td><td>${fmt(t.basePower)}</td><td>${esc(t.mergeState || "—")}</td></tr>`).join("") || `<tr><td colspan="5" class="mut">No Squeeks on this wallet.</td></tr>`;
-    const staked = toks.filter(t => t.custody === "staking").length;
+    const stakedN = toks.filter(t => t.custody === "staking").length;
     const inWallet = toks.filter(t => t.custody === "wallet").length;
     out.innerHTML = `
       <div class="grid">
-        <div class="stat"><div class="k">Squeeks</div><div class="v">${toks.length} <small>(${staked} staked · ${inWallet} in wallet)</small></div></div>
+        <div class="stat"><div class="k">Squeeks</div><div class="v">${toks.length} <small>(${stakedN} staked · ${inWallet} in wallet)</small></div></div>
         <div class="stat"><div class="k">Claimable SQK</div><div class="v">${fmt(claimable)}</div></div>
+        <div class="stat"><div class="k">Staked SQK</div><div class="v">${fmt(staked)}</div></div>
         <div class="stat"><div class="k">Lifetime paid SQK</div><div class="v">${fmt(lifetime)}</div></div>
         <div class="stat"><div class="k">NFT power</div><div class="v">${fmt(nftPower)}</div></div>
         <div class="stat"><div class="k">SQK power</div><div class="v">${fmt(sqkPower)}</div></div>
-        <div class="stat"><div class="k">Current round</div><div class="v">${esc((d.economy || {}).currentRound ?? "—")}</div></div>
       </div>
       ${inWallet > 0 ? `<div class="callout">⚠️ ${inWallet} Squeek(s) sitting in this wallet earn nothing. Deposit them in Staking from the official Sepolia app to activate their power.</div>` : ""}
+      ${claimable > 0 ? `<div class="callout">💰 ${fmt(claimable)} SQK claimable — claim it yourself from the official Sepolia app (your own wallet, Sepolia gas). This page never claims for you.</div>` : ""}
       <table><thead><tr><th>Token</th><th>Level</th><th>Custody</th><th>Base power</th><th>Merge</th></tr></thead><tbody>${rows}</tbody></table>
       <h3 style="margin:18px 0 0; font-size:15px;">Earnings, last 7 days <span class="mut">(SQK)</span></h3>
-      <div class="bars">${earn.map(e => { const v = fromUnits(e.earnedBaseUnits); return `<div class="bar"><i style="height:${Math.max(2, v / maxEarn * 62)}px" title="${fmt(v)} SQK"></i><span>${esc(e.date.slice(5))}</span></div>`; }).join("")}</div>`;
+      <div class="bars">${earn.map(e => { const v = fromUnits(e.earnedBaseUnits); return `<div class="bar"><i style="height:${Math.max(2, v / maxEarn * 62)}px" title="${fmt(v)} SQK"></i><span>${esc(e.date.slice(5))}</span></div>`; }).join("")}</div>
+      <p class="mut" style="font-size:13px; margin-top:8px">${earn.map(e => `${esc(e.date)}: ${fmt(fromUnits(e.earnedBaseUnits))} SQK`).join(" · ")}</p>`;
   } catch (e) {
     out.innerHTML = `<p class="err">Could not load this account from the public API (${esc(e.message)}). Check the address and try again.</p>`;
   }
@@ -199,13 +239,21 @@ function plan() {
     `<div class="callout">With <b>${n}</b> level-1 Squeek(s) you can merge up to <b>level ${level}</b> — one Squeek with <b>${fmt(power)}</b> base power${leftover ? `, plus ${leftover} level-1 leftover(s)` : ""}. Merging all the way from level 1 to ${level} takes ${level - 1} merge(s); level 1 has no cooldown, higher levels wait out a cooldown in completed blocks.</div>`;
 }
 
+function refreshAll() {
+  loadWheel();
+  loadLaunch();
+  loadAccount(document.getElementById("wallet").value.trim());
+  stampUpdated();
+}
+
 document.getElementById("checkBtn").addEventListener("click", () => loadAccount(document.getElementById("wallet").value.trim()));
 document.getElementById("wallet").addEventListener("keydown", e => { if (e.key === "Enter") loadAccount(e.target.value.trim()); });
+document.getElementById("refreshBtn").addEventListener("click", refreshAll);
 document.getElementById("planBtn").addEventListener("click", plan);
 renderLevels();
 plan();
-loadWheel();
-loadAccount(document.getElementById("wallet").value.trim());
+refreshAll();
+setInterval(refreshAll, 60000);
 </script>
 </body>
 </html>
